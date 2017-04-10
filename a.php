@@ -4,17 +4,65 @@
 
     <meta http-equiv="content-type" content="text/html; charset=utf8" />
     <style>
-        .year { padding-right: 5px; }
-        .month { padding-right: 5px; }
+        .year, .month {
+            padding: 1px 2px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        p {
+            margin: 4px 0;
+        }
         .selected { background: orange; }
+        .wrapper{
+            width: 100%;
+            margin: 0 auto;
+        }
+        .side-left{
+            width: 49%;
+            float: left;
+            margin-right: 1%;
+        }
+        .side-right{
+            width: 50%;
+            float: left;
+        }
+        @media screen and (max-width: 720px) {
+            .side-left{
+                width: 100%;
+                clear: both;
+            }
+            .side-right{
+                border-top: solid 2px red;
+                margin-top: 10px;
+                width: 100%;
+                clear: both;
+            }
+        }
     </style>
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript">
-        function want(id){
-            $.get('get_data.php?func=want&id='+id,function(data){
-                $('#want'+id).removeClass('want0').addClass('want1');
+        $(document).ready(function() {
+            $('.year').click(function () {
+                var me = $(this), year = me.val();
+                $('.year.selected').removeClass('selected');
+                me.addClass('selected');
+                $('.month.selected').removeClass('selected');
+                $('.month[data=1]').addClass('selected');
+                $.get('get_data.php?func=year&year='+year, function(data) {
+                    $('#getdata').html(data);
+                });
             });
-        }
+            $('.month').click(function () {
+                var me = $(this)
+                    , month = me.attr('data')
+                    , year = $('.year.selected').val();
+                $('.month.selected').removeClass('selected');
+                me.addClass('selected');
+                $.get('get_data.php?func=month&year='+year+'&month='+month, function(data) {
+                    $('#getdata').html(data);
+                });
+            });
+        });
     </script>
 
 </head>
@@ -56,22 +104,23 @@ if (!isset($_SESSION['login'])) {
 <?php
 print "Hello $user. Last seen you at: $lastseen<br/>";
 $date = getdate();
+print "<p>";
 for ($i=2017; $i<=2025; $i++) {
     $selected = '';
     if ($i == $date['year']) $selected = 'selected';
     print "<span class='year $selected'>$i</span>";
 }
-print "<br/>";
+print "</p><p>";
 $i = ['Янв','Фев','Мар','Апр','Май','Июнь','Июль','Авг','Сен','Окт','Ноя','Дек'];
 $j = 0;
 foreach($i as $mon) {
     $j++;
     $selected = '';
     if ($j == $date['mon']) $selected = 'selected';
-    print "<span class='month $selected'>$mon</span>";
+    print "<span data='$j' class='month $selected'>$mon</span>";
 }
 ?>
-
+</p>
 <div id="getdata">
 
 </div>
