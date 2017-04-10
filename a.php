@@ -43,7 +43,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('.year').click(function () {
-                var me = $(this), year = me.val();
+                var me = $(this), year = me.html();
                 $('.year.selected').removeClass('selected');
                 me.addClass('selected');
                 $('.month.selected').removeClass('selected');
@@ -55,11 +55,18 @@
             $('.month').click(function () {
                 var me = $(this)
                     , month = me.attr('data')
-                    , year = $('.year.selected').val();
+                    , year = $('.year.selected').html();
                 $('.month.selected').removeClass('selected');
                 me.addClass('selected');
                 $.get('get_data.php?func=month&year='+year+'&month='+month, function(data) {
                     $('#getdata').html(data);
+                });
+            });
+            $('#balance_change').click(function () {
+                var me=$('#balance');
+                $.get('get_data.php?func=balance_change&balance='+me.val(), function(data) {
+                    $('#getdata').html(data);
+                    me.val('');
                 });
             });
         });
@@ -102,7 +109,7 @@ if (!isset($_SESSION['login'])) {
 ?>
 <b>Бюджет</b><br/>
 <?php
-print "Hello $user. Last seen you at: $lastseen<br/>";
+print "Hello $user. Last seen you at: $lastseen <input id='balance' type='text'/><input id='balance_change' value='Обновить баланс' type='button'/><br/>";
 $date = getdate();
 print "<p>";
 for ($i=2017; $i<=2025; $i++) {
