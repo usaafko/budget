@@ -66,15 +66,35 @@ function printDohod($year,$month,$day){
     return $text;
 }
 
+function printRashod($year,$month,$day){
+    $text = "";
+    global $db;
+    $res = mysql_query("SELECT * FROM rashod_periodic WHERE den='$day'",$db);
+    $i = 0;
+    while ($data = mysql_fetch_assoc($res)){
+        $i++;
+        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span><br/>";
+    }
+    $res = mysql_query("SELECT * FROM rashod WHERE add_date='$year-$month-$day'",$db);
+    while ($data = mysql_fetch_assoc($res)){
+        $i++;
+        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span><input type='button' value='изменить' data='".$data['id']."'/><br/>";
+    }
+    $text .= "<input class='addrashod' type='button' date='$year-$month-$day' value='новый'/>";
+    return $text;
+}
+
 function printMonth ($year,$month = 1){
 
 ?>
     <div class="wrapper">
         <div class="side-left">
-            <?php print printDohod($year,$month,5); ?>
+            <div><?php print printDohod($year,$month,5); ?></div>
+            <div><?php print printRashod($year,$month,5); ?></div>
         </div>
         <div class="side-right">
-            <?php print printDohod($year,$month,20); ?>
+            <div><?php print printDohod($year,$month,20); ?></div>
+            <div><?php print printRashod($year,$month,20); ?></div>
         </div>
     </div>
 <?php
