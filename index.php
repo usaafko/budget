@@ -69,6 +69,7 @@
                     me.val('');
                 });
             });
+            $('.month.selected').click();
         });
     </script>
 
