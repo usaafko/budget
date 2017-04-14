@@ -26,6 +26,12 @@
             width: 50%;
             float: left;
         }
+        .button,.addrashod {
+            color: #fff;
+            background-color: #6496c8;
+            text-shadow: -1px 1px #417cb8;
+            border: none;
+        }
         @media screen and (max-width: 720px) {
             .side-left{
                 width: 100%;
