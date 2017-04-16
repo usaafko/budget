@@ -26,11 +26,15 @@
             width: 50%;
             float: left;
         }
-        .button,.addrashod {
+        .button {
             color: #fff;
             background-color: #6496c8;
             text-shadow: -1px 1px #417cb8;
             border: none;
+            cursor: pointer;
+        }
+        .bottom_pad {
+            margin-bottom: 2px;
         }
         @media screen and (max-width: 720px) {
             .side-left{
@@ -76,6 +80,25 @@
                 });
             });
             $('.month.selected').click();
+            $('body').on('click', '.button.addrashod', function() {
+                var button = $(this)
+                    , date = button.attr('date')
+                    , wrapper = button.parent()
+                    , text = "<input placeholder='Название' type='text' class='bottom_pad addrashod_title'/><br/>" +
+                        "<input placeholder='Сумма' type='text' class='bottom_pad addrashod_value'/><br/>" +
+                        "<input class='button addrashod_go' date='"+date+"' type='button' value='Добавить'/>";
+                wrapper.html(text);
+            });
+            $('body').on('click', '.button.addrashod_go', function() {
+                var button = $(this)
+                    , date = button.attr('date')
+                    , wrapper = button.parent()
+                    , text = wrapper.find('.addrashod_title').val()
+                    , summa = wrapper.find('.addrashod_value').val();
+                $.get('get_data.php?func=addrashod_go&date='+date+'&text='+text+'&summa='+summa, function(data) {
+                    $('#getdata').html(data);
+                });
+            });
         });
     </script>
 
@@ -116,7 +139,7 @@ if (!isset($_SESSION['login'])) {
 ?>
 <b>Бюджет</b><br/>
 <?php
-print "Hello $user. Last seen you at: $lastseen <input id='balance' type='text'/><input id='balance_change' value='Обновить баланс' type='button'/><br/>";
+print "Hello $user. Last seen you at: $lastseen <input id='balance' type='text'/> <input id='balance_change' value='Обновить баланс' class='button' type='button'/><br/>";
 $date = getdate();
 print "<p>";
 for ($i=2017; $i<=2025; $i++) {

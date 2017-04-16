@@ -78,9 +78,9 @@ function printRashod($year,$month,$day){
     $res = mysql_query("SELECT * FROM rashod WHERE add_date='$year-$month-$day'",$db);
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button' type='button' value='изменить' data='".$data['id']."'/><br/>";
+        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' data='".$data['id']."'/><br/>";
     }
-    $text .= "<input class='addrashod' type='button' date='$year-$month-$day' value='новый'/>";
+    $text .= "<span><input class='button addrashod' type='button' date='$year-$month-$day' value='новый'/></span>";
     return $text;
 }
 
@@ -115,5 +115,13 @@ if ($func == 'month') {
 if ($func == 'balance_change'){
     $balance = mysql_real_escape_string($_GET['balance'],$db);
     mysql_query("INSERT INTO balance (summa,change_date) VALUES ('$balance',now())",$db);
+}
+if ($func == 'addrashod_go'){
+    $text = $_GET['text'];
+    $summa = $_GET['summa'];
+    $date = $_GET['date'];
+    list ($year,$month) = split("-",$date);
+    mysql_query("INSERT INTO rashod (add_date,summa,title) VALUE ('$date','$summa','$text')");
+    printMonth($year,$month);
 }
 ?>
