@@ -107,6 +107,18 @@
                     $('#getdata').html(data);
                 });
             });
+            $('body').on('click', '.button.editrashod', function() {
+                var button = $(this)
+                    , id = button.attr('rid')
+                    , date = button.attr('date')
+                    , title = button.attr('rtitle')
+                    , summa = button.attr('rsumma')
+                    , wrapper = button.parent()
+                    , text = "<input placeholder='Название' type='text' value='"+title+"' class='bottom_pad editrashod_title'/><br/>" +
+                    "<input placeholder='Сумма' type='text' value='"+summa+"' class='bottom_pad editrashod_value'/><br/>" +
+                    "<input class='button editrashod_go' date='"+date+"' rid='"+id+"' type='button' value='Изменить'/>";;
+                wrapper.html(text);
+            });
         });
     </script>
 
