@@ -99,7 +99,7 @@ function printRashod($cldate){
     $res = mysql_query("SELECT * FROM rashod WHERE add_date='".$cldate->pdate."'",$db);
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' data='".$data['id']."'/> <input type='button' value='удалить' data='".$data['id']."' class='button removerashod'/><br/>";
+        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' rid='".$data['id']."'/> <input type='button' value='удалить' rid='".$data['id']."' class='button removerashod' date='".$cldate->pdate."'/><br/>";
     }
     $text .= "<span><input class='button addrashod' type='button' date='".$cldate->pdate."' value='новый'/></span>";
     return $text;
@@ -159,8 +159,15 @@ if ($func == 'addrashod_go'){
     $text = $_GET['text'];
     $summa = $_GET['summa'];
     $date = $_GET['date'];
-    list ($year,$month) = split("-",$date);
+    list ($year,$month,$day) = split("-",$date);
     mysql_query("INSERT INTO rashod (add_date,summa,title) VALUE ('$date','$summa','$text')");
-    printMonth($year,$month);
+    printMonth(new mydate($year,$month,$day));
+}
+if ($func == 'remove_rashod'){
+    $id = $_GET['id'];
+    $date = $_GET['date'];
+    mysql_query("DELETE FROM rashod WHERE id=$id");
+    list ($year,$month,$day) = split("-",$date);
+    printMonth(new mydate($year,$month,$day));
 }
 ?>

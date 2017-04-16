@@ -99,6 +99,14 @@
                     $('#getdata').html(data);
                 });
             });
+            $('body').on('click', '.button.removerashod', function() {
+                var button = $(this)
+                    , id = button.attr('rid')
+                    , date = button.attr('date');
+                $.get('get_data.php?func=remove_rashod&id='+id+'&date='+date, function(data) {
+                    $('#getdata').html(data);
+                });
+            });
         });
     </script>
 
