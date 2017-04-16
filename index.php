@@ -119,6 +119,17 @@
                     "<input class='button editrashod_go' date='"+date+"' rid='"+id+"' type='button' value='Изменить'/>";;
                 wrapper.html(text);
             });
+            $('body').on('click', '.button.editrashod_go', function() {
+                var button = $(this)
+                    , date = button.attr('date')
+                    , id = button.attr('rid')
+                    , wrapper = button.parent()
+                    , text = wrapper.find('.editrashod_title').val()
+                    , summa = wrapper.find('.editrashod_value').val();
+                $.get('get_data.php?func=editrashod_go&id='+id+'&date='+date+'&text='+text+'&summa='+summa, function(data) {
+                    $('#getdata').html(data);
+                });
+            });
         });
     </script>
 

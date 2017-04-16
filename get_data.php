@@ -172,4 +172,13 @@ if ($func == 'remove_rashod'){
     list ($year,$month,$day) = split("-",$date);
     printMonth(new mydate($year,$month,$day));
 }
+if ($func == 'editrashod_go'){
+    $id = $_GET['id'];
+    $date = $_GET['date'];
+    list ($year,$month,$day) = split("-",$date);
+    $text = $_GET['text'];
+    $summa = $_GET['summa'];
+    mysql_query("UPDATE rashod SET title='$text',summa='$summa' WHERE id=$id");
+    printMonth(new mydate($year,$month,$day));
+}
 ?>
