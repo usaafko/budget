@@ -94,12 +94,14 @@ function printRashod($cldate){
     $i = 0;
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span><br/>";
+        $text .= "$i. ".$data['title']." ".$data['summa']."<br/>";
     }
     $res = mysql_query("SELECT * FROM rashod WHERE add_date='".$cldate->pdate."'",$db);
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' rid='".$data['id']."'/> <input type='button' value='удалить' rid='".$data['id']."' class='button removerashod' date='".$cldate->pdate."'/><br/>";
+        $text .= $i.". ".$data['title']." ".$data['summa']." "
+            ."<input class='button editrashod' type='button' value='изменить' rid='".$data['id']."'/> "
+            ."<input type='button' value='удалить' rid='".$data['id']."' class='button removerashod' date='".$cldate->pdate."'/><br/>";
     }
     $text .= "<span><input class='button addrashod' type='button' date='".$cldate->pdate."' value='новый'/></span>";
     return $text;
