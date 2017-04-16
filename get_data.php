@@ -23,81 +23,115 @@ function getVal($query){
         return 0;
     }
 }
-function ostalos($year,$month,$day){
-    $sql_date1 = "$year-$month-$day";
-
-    if ($day == 20){
-        $day = 5;
-    } else {
-        $day = 20;
-        if ($month == 1){
-            $year--;
-            $month = 12;
-        }else{
-            $month--;
-        }
+class mydate{
+    public $pdate = '';
+    public $year;
+    public $month;
+    public $day;
+    public $date;
+    function __construct($year,$month = 1, $day = 5){
+        $this->pdate = $year.'-'.$month.'-'.$day;
+        $this->year = $year;
+        $this->month = $month;
+        $this->day = $day;
+        $this->date = ['year'=>$year,'month'=>$month,'day'=>$day];
     }
-    $sql_date2 = "$year-$month-$day";
+    public function calcDate(){
+        $date = $this->date;
+        if ($date['day'] == 20){
+            $date['day'] = 5;
+        } else {
+            $date['day'] = 20;
+            if ($date['month'] == 1){
+                $date['year']--;
+                $date['month'] = 12;
+            }else{
+                $date['month']--;
+            }
+        }
+        return new mydate($date['year'],$date['month'],$date['day']);
+    }
+    public function changeDay($day){
+        $this->pdate = $this->year.'-'.$this->month.'-'.$day;
+        $this->day = $day;
+        $this->date['day'] = $day;
+    }
 
-    $query = "SELECT summa FROM balance WHERE change_date <= '$sql_date1' AND change_date > '$sql_date2' ORDER BY change_date DESC LIMIT 1";
+}
+function svobodnie($cldate){
+    $sv['plan_dohod'] = getVal("SELECT sum(summa) FROM dohod_periodic WHERE den='".$cldate->day."'");
+    $sv['dohod'] = getVal("SELECT sum(summa) FROM dohod WHERE add_date='".$cldate->pdate."'");
+    $sv['ostalos'] = ostalos($cldate);
+    $sv['summa'] = $sv['ostalos'] + $sv['plan_dohod'] + $sv['dohod'];
+    $sv['rashod_periodic'] = getVal("SELECT sum(summa) FROM rashod_periodic WHERE den='".$cldate->day."'");
+    $sv['rashod'] = getVal("SELECT sum(summa) FROM rashod WHERE add_date='".$cldate->pdate."'");
+    $sv['svobodnie'] = $sv['summa'] - $sv['rashod_periodic'] - $sv['rashod'];
+    return $sv;
+}
+function ostalos($cldate){
+    $newdate = $cldate->calcDate();
+    $query = "SELECT summa FROM balance WHERE change_date <= '".$cldate->pdate."' AND change_date > '".$newdate->pdate."' ORDER BY change_date DESC LIMIT 1";
     $q_data = mysql_query ($query);
     if (mysql_num_rows($q_data) > 0) return mysql_fetch_array($q_data)[0];
 
-    $ostalos_pred = ostalos($year,$month,$day);
-    $plan_dohod = getVal("SELECT sum(summa) FROM dohod_periodic WHERE den='$day'");
-    $dohod = getVal("SELECT sum(summa) FROM dohod WHERE add_date='$year-$month-$day'");
-    $summa = $ostalos_pred + $plan_dohod + $dohod;
-    $rashod_periodic = getVal("SELECT sum(summa) FROM rashod_periodic WHERE den='$day'");
-    $rashod = getVal("SELECT sum(summa) FROM rashod WHERE add_date='$year-$month-$day'");
-    return $summa - $rashod - $rashod_periodic;
+    $sv = svobodnie($newdate);
+    return $sv['summa'] - $sv['rashod'] - $sv['rashod_periodic'];
 }
-function printDohod($year,$month,$day){
-    $plan_dohod = getVal("SELECT sum(summa) FROM dohod_periodic WHERE den='$day'");
-    $dohod = getVal("SELECT sum(summa) FROM dohod WHERE add_date='$year-$month-$day'");
-    $ostalos = ostalos($year,$month,$day);
-    $summa = $ostalos + $plan_dohod + $dohod;
-    $rashod_periodic = getVal("SELECT sum(summa) FROM rashod_periodic WHERE den='$day'");
-    $rashod = getVal("SELECT sum(summa) FROM rashod WHERE add_date='$year-$month-$day'");
-    $svobodnie = $summa - $rashod_periodic - $rashod;
-    $text = "$day.$month<br/>
-<span style='text-decoration:underline;'>Доходы</span><br/>
-<b>План доход: </b>$plan_dohod<br/>
-<b>Осталось с пред. месяца: </b>$ostalos<br/>
-<b>Сумма: </b>" . ($ostalos+$plan_dohod) ."<br/><hr/>
-<b>Расходы: </b>".($rashod+$rashod_periodic)."<br/>
-<b>Свободные деньги: </b>$svobodnie<br/>";
-    return $text;
+function printDohod($cldate){
+    $sv = svobodnie($cldate);
+    return "<span style='text-decoration:underline;'>Доходы</span><br/>
+<b>План доход: </b>".$sv['plan_dohod']."<br/>
+<b>Осталось с пред. месяца: </b>".$sv['ostalos']."<br/>
+<b>Сумма: </b>" . ($sv['ostalos']+$sv['plan_dohod']) ."<br/>
+<b>Расходы: </b>".($sv['rashod']+$sv['rashod_periodic'])."<br/>
+<b>Свободные деньги: </b>".$sv['svobodnie']."<br/><hr/>";
 }
 
-function printRashod($year,$month,$day){
+function printRashod($cldate){
     $text = "";
     global $db;
-    $res = mysql_query("SELECT * FROM rashod_periodic WHERE den='$day'",$db);
+    $res = mysql_query("SELECT * FROM rashod_periodic WHERE den='".$cldate->day."'",$db);
     $i = 0;
     while ($data = mysql_fetch_assoc($res)){
         $i++;
         $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span><br/>";
     }
-    $res = mysql_query("SELECT * FROM rashod WHERE add_date='$year-$month-$day'",$db);
+    $res = mysql_query("SELECT * FROM rashod WHERE add_date='".$cldate->pdate."'",$db);
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' data='".$data['id']."'/><br/>";
+        $text .= "<span>$i. ".$data['title']."</span> <span>".$data['summa']."</span> <input class='button editrashod' type='button' value='изменить' data='".$data['id']."'/> <input type='button' value='удалить' data='".$data['id']."' class='button removerashod'/><br/>";
     }
-    $text .= "<span><input class='button addrashod' type='button' date='$year-$month-$day' value='новый'/></span>";
+    $text .= "<span><input class='button addrashod' type='button' date='".$cldate->pdate."' value='новый'/></span>";
     return $text;
 }
-
-function printMonth ($year,$month = 1){
+function printBalance($cldate){
+    $res = mysql_query("SELECT * FROM balance WHERE change_date <= '".$cldate->pdate."' AND change_date > '".$cldate->calcDate()->pdate."'");
+    if (mysql_num_rows($res) > 0) {
+        $text = '<b>Изменения баланса</b><br/>';
+        while ($data = mysql_fetch_assoc($res)){
+            $text .= $data['change_date']." ".$data['summa']."<br/>";
+        }
+    }else{
+        $text = 'Изменений баланса не было';
+    }
+    return $text;
+}
+function printPartMonth($cldate,$day){
+    $cldate->changeDay($day);
+    return "<div>".$cldate->month.".".$cldate->day."</div>
+    <div>".printBalance($cldate)."</div>
+    <div>".printDohod($cldate)."</div>
+    <div>".printRashod($cldate)."</div>";
+}
+function printMonth ($cldate){
 
 ?>
     <div class="wrapper">
         <div class="side-left">
-            <div><?php print printDohod($year,$month,5); ?></div>
-            <div><?php print printRashod($year,$month,5); ?></div>
+            <?php print printPartMonth($cldate,5); ?>
         </div>
         <div class="side-right">
-            <div><?php print printDohod($year,$month,20); ?></div>
-            <div><?php print printRashod($year,$month,20); ?></div>
+            <?php print printPartMonth($cldate,20); ?>
         </div>
     </div>
 <?php
@@ -106,13 +140,15 @@ function printMonth ($year,$month = 1){
 include 'base.php';
 if ($func == 'year') {
     $year = $_GET['year'];
-    printMonth($year);
+    $cldate = new mydate($year);
+    printMonth($cldate);
 
 }
 if ($func == 'month') {
     $year = $_GET['year'];
     $month = $_GET['month'];
-    printMonth($year,$month);
+    $cldate = new mydate($year,$month);
+    printMonth($cldate);
 
 }
 if ($func == 'balance_change'){
