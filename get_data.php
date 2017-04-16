@@ -24,11 +24,8 @@ function getVal($query){
     }
 }
 function ostalos($year,$month,$day){
-    $query = "SELECT summa FROM balance WHERE change_date >= '$year-$month-$day' ORDER BY id DESC LIMIT 1";
-    $last_balance = getVal($query);
-    trigger_error($query,E_USER_WARNING);
-    trigger_error("last_balance: $last_balance, year: $year, month: $month, day: $day",E_USER_WARNING);
-    if ($last_balance > 0) return $last_balance;
+    $sql_date1 = "$year-$month-$day";
+
     if ($day == 20){
         $day = 5;
     } else {
@@ -40,6 +37,12 @@ function ostalos($year,$month,$day){
             $month--;
         }
     }
+    $sql_date2 = "$year-$month-$day";
+
+    $query = "SELECT summa FROM balance WHERE change_date <= '$sql_date1' AND change_date > '$sql_date2' ORDER BY change_date DESC LIMIT 1";
+    $q_data = mysql_query ($query);
+    if (mysql_num_rows($q_data) > 0) return mysql_fetch_array($q_data)[0];
+
     $ostalos_pred = ostalos($year,$month,$day);
     $plan_dohod = getVal("SELECT sum(summa) FROM dohod_periodic WHERE den='$day'");
     $dohod = getVal("SELECT sum(summa) FROM dohod WHERE add_date='$year-$month-$day'");
