@@ -86,53 +86,68 @@
                 });
             });
             $('.month.selected').click();
-            $('body').on('click', '.button.addrashod', function() {
+            $('body').on('click', '.button.add', function() {
                 var button = $(this)
                     , date = button.attr('date')
                     , wrapper = button.parent()
-                    , text = "<input placeholder='Название' type='text' class='bottom_pad addrashod_title'/><br/>" +
-                        "<input placeholder='Сумма' type='text' class='bottom_pad addrashod_value'/><br/>" +
-                        "<input class='button addrashod_go' date='"+date+"' type='button' value='Добавить'/>";
+                    , actiontype = button.attr('actiontype')
+                    , text = "<input placeholder='Название' type='text' class='bottom_pad add_title'/><br/>" +
+                        "<input placeholder='Сумма' type='text' class='bottom_pad add_value'/><br/>" +
+                        "<input class='button add_go' actiontype='"+actiontype+"' date='"+date+"' type='button' value='Добавить'/>";
                 wrapper.html(text);
             });
-            $('body').on('click', '.button.addrashod_go', function() {
+            $('body').on('click', '.button.add_go', function() {
                 var button = $(this)
                     , date = button.attr('date')
                     , wrapper = button.parent()
-                    , text = wrapper.find('.addrashod_title').val()
-                    , summa = wrapper.find('.addrashod_value').val();
-                $.get('get_data.php?func=addrashod_go&date='+date+'&text='+text+'&summa='+summa, function(data) {
+                    , actiontype = button.attr('actiontype')
+                    , text = wrapper.find('.add_title').val()
+                    , summa = wrapper.find('.add_value').val();
+                $.get('get_data.php?func=add_go&date='+date+'&text='+text+'&summa='+summa+'&actiontype='+actiontype, function(data) {
                     $('#getdata').html(data);
                 });
             });
-            $('body').on('click', '.button.removerashod', function() {
+            $('body').on('click', '.button.remove', function() {
                 var button = $(this)
                     , id = button.attr('rid')
+                    , actiontype = button.attr('actiontype')
                     , date = button.attr('date');
-                $.get('get_data.php?func=remove_rashod&id='+id+'&date='+date, function(data) {
+
+                $.get('get_data.php?func=remove&id='+id+'&date='+date+'&actiontype='+actiontype, function(data) {
                     $('#getdata').html(data);
                 });
             });
-            $('body').on('click', '.button.editrashod', function() {
+            $('body').on('click', '.button.edit', function() {
                 var button = $(this)
                     , id = button.attr('rid')
                     , date = button.attr('date')
+                    , actiontype = button.attr('actiontype')
                     , title = button.attr('rtitle')
                     , summa = button.attr('rsumma')
                     , wrapper = button.parent()
-                    , text = "<input placeholder='Название' type='text' value='"+title+"' class='bottom_pad editrashod_title'/><br/>" +
-                    "<input placeholder='Сумма' type='text' value='"+summa+"' class='bottom_pad editrashod_value'/><br/>" +
-                    "<input class='button editrashod_go' date='"+date+"' rid='"+id+"' type='button' value='Изменить'/>";;
+                    , text = "<input placeholder='Название' type='text' value='"+title+"' class='bottom_pad edit_title'/><br/>" +
+                    "<input placeholder='Сумма' type='text' value='"+summa+"' class='bottom_pad edit_value'/><br/>" +
+                    "<input class='button edit_go' date='"+date+"' actiontype='"+actiontype+"' rid='"+id+"' type='button' value='Изменить'/>";;
                 wrapper.html(text);
             });
-            $('body').on('click', '.button.editrashod_go', function() {
+            $('body').on('click', '.button.edit_go', function() {
                 var button = $(this)
                     , date = button.attr('date')
                     , id = button.attr('rid')
                     , wrapper = button.parent()
-                    , text = wrapper.find('.editrashod_title').val()
-                    , summa = wrapper.find('.editrashod_value').val();
-                $.get('get_data.php?func=editrashod_go&id='+id+'&date='+date+'&text='+text+'&summa='+summa, function(data) {
+                    , actiontype = button.attr('actiontype')
+                    , text = wrapper.find('.edit_title').val()
+                    , summa = wrapper.find('.edit_value').val();
+                $.get('get_data.php?func=edit_go&id='+id+'&date='+date+'&text='+text+'&summa='+summa+'&actiontype='+actiontype, function(data) {
+                    $('#getdata').html(data);
+                });
+            });
+            $('body').on('click', '.button.fact', function() {
+                var button = $(this)
+                    , id = button.attr('rid')
+                    , actiontype = button.attr('actiontype')
+                    , date = button.attr('date');
+                $.get('get_data.php?func=fact&id='+id+'&date='+date+'&actiontype='+actiontype, function(data) {
                     $('#getdata').html(data);
                 });
             });

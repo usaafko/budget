@@ -78,13 +78,25 @@ function ostalos($cldate){
     return $sv['summa'] - $sv['rashod'] - $sv['rashod_periodic'];
 }
 function printDohod($cldate){
+    global $db;
     $sv = svobodnie($cldate);
-    return "<span style='text-decoration:underline;'>Доходы</span><br/>
-<b>План доход: </b>".$sv['plan_dohod']."<br/>
+    $text = "<span style='text-decoration:underline;'>Доходы</span><br/>
+<b>План доход: </b>".$sv['plan_dohod']."<br/>";
+    $res = mysql_query("SELECT * FROM dohod WHERE add_date='".$cldate->pdate."'",$db);
+    $i=0;
+    while ($data = mysql_fetch_assoc($res)){
+        $i++;
+        $text .= "<span>".$i.". ".$data['title']." ".$data['summa']." "
+            ."<input class='button edit' actiontype='dohod' type='button' value='изменить' rid='".$data['id']."' date='".$cldate->pdate."' rtitle='".$data['title']."' rsumma='".$data['summa']."'/> "
+            ."<input class='button remove' actiontype='dohod' type='button' value='удалить' rid='".$data['id']."'  date='".$cldate->pdate."'/>"
+            ."</span><br/>";
+    }
+    $text .= "<input type='button' value='добавить доход' class='button add' actiontype='dohod' date='".$cldate->pdate."'/><br/>
 <b>Осталось с пред. месяца: </b>".$sv['ostalos']."<br/>
-<b>Сумма: </b>" . ($sv['ostalos']+$sv['plan_dohod']) ."<br/>
+<b>Сумма: </b>" . $sv['summa']."<br/>
 <b>Расходы: </b>".($sv['rashod']+$sv['rashod_periodic'])."<br/>
 <b>Свободные деньги: </b>".$sv['svobodnie']."<br/><hr/>";
+    return $text;
 }
 
 function printRashod($cldate){
@@ -99,11 +111,15 @@ function printRashod($cldate){
     $res = mysql_query("SELECT * FROM rashod WHERE add_date='".$cldate->pdate."'",$db);
     while ($data = mysql_fetch_assoc($res)){
         $i++;
-        $text .= "<span>".$i.". ".$data['title']." ".$data['summa']." "
-            ."<input class='button editrashod' type='button' value='изменить' rid='".$data['id']."' date='".$cldate->pdate."' rtitle='".$data['title']."' rsumma='".$data['summa']."'/> "
-            ."<input type='button' value='удалить' rid='".$data['id']."' class='button removerashod' date='".$cldate->pdate."'/></span><br/>";
+        $text .= "<span>".$i.". ".$data['title']." ".$data['summa']." ".$data['fact_date'];
+        if (! $data['fact']){
+            $text .= " <input class='button edit' type='button' actiontype='rashod' value='изменить' rid='" . $data['id'] . "' date='" . $cldate->pdate . "' rtitle='" . $data['title'] . "' rsumma='" . $data['summa'] . "'/> "
+            . "<input class='button remove' type='button' actiontype='rashod' value='удалить' rid='" . $data['id'] . "'  date='" . $cldate->pdate . "'/> "
+            . "<input class='button fact' type='button' actiontype='rashod' value='зафиксировать' rid='" . $data['id'] . "'  date='" . $cldate->pdate . "'/>";
+        }
+        $text .= "</span><br/>";
     }
-    $text .= "<span><input class='button addrashod' type='button' date='".$cldate->pdate."' value='новый'/></span>";
+    $text .= "<span><input class='button add' actiontype='rashod' type='button' date='".$cldate->pdate."' value='новый'/></span>";
     return $text;
 }
 function printBalance($cldate){
@@ -157,28 +173,39 @@ if ($func == 'balance_change'){
     $balance = mysql_real_escape_string($_GET['balance'],$db);
     mysql_query("INSERT INTO balance (summa,change_date) VALUES ('$balance',now())",$db);
 }
-if ($func == 'addrashod_go'){
+if ($func == 'add_go'){
     $text = $_GET['text'];
     $summa = $_GET['summa'];
     $date = $_GET['date'];
+    $type = $_GET['actiontype'];
     list ($year,$month,$day) = split("-",$date);
-    mysql_query("INSERT INTO rashod (add_date,summa,title) VALUE ('$date','$summa','$text')");
+    mysql_query("INSERT INTO ".$type." (add_date,summa,title) VALUE ('$date','$summa','$text')");
     printMonth(new mydate($year,$month,$day));
 }
-if ($func == 'remove_rashod'){
+if ($func == 'remove'){
     $id = $_GET['id'];
     $date = $_GET['date'];
-    mysql_query("DELETE FROM rashod WHERE id=$id");
+    $type = $_GET['actiontype'];
+    mysql_query("DELETE FROM ".$type." WHERE id=$id");
     list ($year,$month,$day) = split("-",$date);
     printMonth(new mydate($year,$month,$day));
 }
-if ($func == 'editrashod_go'){
+if ($func == 'edit_go'){
     $id = $_GET['id'];
     $date = $_GET['date'];
+    $type = $_GET['actiontype'];
     list ($year,$month,$day) = split("-",$date);
     $text = $_GET['text'];
     $summa = $_GET['summa'];
-    mysql_query("UPDATE rashod SET title='$text',summa='$summa' WHERE id=$id");
+    mysql_query("UPDATE ".$type." SET title='$text',summa='$summa' WHERE id=$id");
+    printMonth(new mydate($year,$month,$day));
+}
+if ($func == 'fact'){
+    $id = $_GET['id'];
+    $date = $_GET['date'];
+    $type = $_GET['actiontype'];
+    list ($year,$month,$day) = split("-",$date);
+    mysql_query("UPDATE ".$type." SET fact=1,fact_date=now() WHERE id=$id");
     printMonth(new mydate($year,$month,$day));
 }
 ?>
