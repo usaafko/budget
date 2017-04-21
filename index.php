@@ -3,6 +3,7 @@
 <head>
 
     <meta http-equiv="content-type" content="text/html; charset=utf8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <style>
         .year, .month {
             padding: 1px 2px;
@@ -21,10 +22,12 @@
             width: 49%;
             float: left;
             margin-right: 1%;
+            background: skyblue;
         }
         .side-right{
             width: 50%;
             float: left;
+            background: palegreen;
         }
         .button {
             color: #fff;
@@ -36,7 +39,10 @@
         .bottom_pad {
             margin-bottom: 2px;
         }
-        @media screen and (max-width: 720px) {
+        @media (max-width: 600px) {
+            body {
+                font-size: 1.5em;
+            }
             .side-left{
                 width: 100%;
                 clear: both;
